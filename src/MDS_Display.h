@@ -13,6 +13,7 @@
  */
 
 #pragma once
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -20,16 +21,49 @@
 
 class MDS_Display {
 public:
-	explicit MDS_Display(TwoWire& wire = Wire, uint8_t address = 0x3C,
-		uint8_t rotation = 2, uint32_t clock = 100000);
-	// Caller initializes the shared bus before setup().
-	bool setup();
+	enum class Error {
+		None,
+		DeviceNotFound,
+		InitializationFailed
+	};
+
+	// Select the OLED bus, address, orientation, and transfer clock.
+	explicit MDS_Display(
+		TwoWire& wire = Wire, uint8_t address = 0x3C, uint8_t rotation = 2, uint32_t clock = 100000);
+
+	// Initialize the OLED after the caller has initialized the shared I2C bus.
+	bool begin();
+
+	// Scroll one blank line into the display and return true for callback compatibility.
 	bool clearMessage();
+
+	// Clear the OLED and diagnostic lines, then restart the scrolling interval.
 	void clear();
+
+	// Append a diagnostic line, redraw the OLED, and restart the scrolling interval.
 	void D(const String& message);
+
+	// Scroll one blank line when the initialized display reaches its timeout.
 	void tick();
-	bool ready() const { return ready_; }
-	Adafruit_SSD1306* getDevice() { return &display_; }
+
+	// Report whether OLED initialization succeeded, without probing current device health.
+	bool ready() const {
+		return ready_;
+	}
+
+	// Return the last initialization failure; queries and display updates leave it unchanged.
+	Error error() const {
+		return error_;
+	}
+
+	// Describe the recorded error, or return an empty string when error() is None.
+	const char* lastError() const;
+
+	// Borrow the underlying OLED device for drawing outside the diagnostic line buffer.
+	Adafruit_SSD1306* device() {
+		return &display_;
+	}
+
 private:
 	static constexpr uint8_t Lines = 4;
 	static constexpr uint32_t Timeout = 5000;
@@ -38,6 +72,7 @@ private:
 	uint8_t address_;
 	uint8_t rotation_;
 	bool ready_ = false;
+	Error error_ = Error::None;
 	String lines_[Lines];
 	uint32_t lastScroll_ = 0;
 };

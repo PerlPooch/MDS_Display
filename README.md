@@ -30,7 +30,7 @@ void setup() {
     Serial.begin(115200);
     Wire.begin(SDA_PIN, SCL_PIN);
 
-    if (!display.setup()) {
+    if (!display.begin()) {
         Serial.println("OLED initialization failed");
         return;
     }
@@ -55,3 +55,23 @@ Firmware and software: **MPL-2.0**. Documentation and website: **CC BY-SA 4.0**.
 ## Contributions
 
 Contributions require a Developer Certificate of Origin (DCO) sign-off. Use `git commit -s` to add a `Signed-off-by` line to each contribution commit.
+
+## Initialization API
+
+`begin()` is the initialization method; the former `setup()` name is removed.
+
+Use `device()` to borrow the underlying `Adafruit_SSD1306*` for direct drawing.
+The former `getDevice()` name is removed.
+
+## Initialization errors
+
+`error()` returns `MDS_Display::Error::None`, `DeviceNotFound`, or
+`InitializationFailed`. `lastError()` describes that code and is empty for `None`.
+`DeviceNotFound` means the I2C address did not acknowledge; `InitializationFailed`
+means the SSD1306 initialization call failed after the address acknowledged.
+
+A new object has no recorded error. Failed `begin()` calls replace the error;
+a successful `begin()` clears it. Queries, drawing, clearing, and scrolling leave
+it unchanged. These codes describe initialization, not continuous device health.
+
+Run `sh tests/run.sh` for host checks of initialization failures and recovery.

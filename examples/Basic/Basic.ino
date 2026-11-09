@@ -24,8 +24,8 @@ void setup() {
     Serial.begin(115200);
     Wire.begin(SDA_PIN, SCL_PIN);
 
-    if (!display.setup()) {
-        Serial.println("OLED initialization failed");
+    if (!display.begin()) {
+        Serial.println(display.lastError());
         return;
     }
 
