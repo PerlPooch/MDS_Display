@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * MDS_Display 0.1.0 - https://home.marcspencer.com/mds-display
+ * MDS_Display - https://home.marcspencer.com/mds-display
  *
  * Copyright (c) 2026 Marc D. Spencer.
  * All Rights Reserved under the applicable license.
